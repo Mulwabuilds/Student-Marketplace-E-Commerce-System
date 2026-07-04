@@ -1,6 +1,6 @@
 # Sprint 1 — Database Design & Implementation (Week 1)
 
-**Team:** Dev A (high proficiency) · Dev B (medium proficiency) · Dev C (low proficiency)
+**Team:** Lee · Ian · Kevin
 **Repo:** fresh, fork-based workflow — each dev works on their own fork, opens Pull Requests (PRs) against `main`
 **Sync cadence:** async check-in every 2 days (end of Day 1, Day 3, Day 5) + full team PR review on Day 7
 **Definition of Done (per ticket, unless stated otherwise):** migration created and applies cleanly + model registered in Django admin + admin page loads and a record can be created through it
@@ -23,7 +23,7 @@ apps/
 
 ### T1 — Project scaffold + `accounts` app + `User` model
 - **Labels:** `foundation`, `accounts`, `priority:blocking`
-- **Assignee:** Dev A (high)
+- **Assignee:** Lee 
 - **Depends on:** nothing (first ticket)
 - **Description:** Initialize the Django project (`django-admin startproject`), configure `.env`-based settings (`django-environ` or `python-decouple`), create the `apps/accounts` app, implement a custom `User` model (subclassing `AbstractUser`) with: `email` (unique, `CHECK` constraint enforcing `@kabarak.ac.ke` domain at the DB level), `otp_code_hash`, `otp_expires_at`, `is_email_verified`. Wire `AUTH_USER_MODEL` in settings before the first migration (cannot be changed later without a painful reset).
 - **Acceptance criteria:** `python manage.py migrate` runs clean on a fresh PostgreSQL database; `User` is registered in Django admin; a superuser can be created and logged into `/admin`; attempting to create a user with a non-`@kabarak.ac.ke` email fails at the database level, not just in a form.
@@ -31,14 +31,14 @@ apps/
 
 ### T2 — Environment setup + `catalog` app + `CampusLocation`
 - **Labels:** `foundation`, `catalog`, `onboarding`
-- **Assignee:** Dev B (medium)
+- **Assignee:** Ian 
 - **Depends on:** nothing
 - **Description:** Get local PostgreSQL running, Django connected via `.env`, confirm `manage.py runserver` works. Create `apps/catalog`, implement `CampusLocation` (`id`, `name` unique). Seed 3–5 placeholder rows (real Kabarak locations still needed from the team — FLAG 8 unresolved).
 - **Acceptance criteria:** migration applies; `CampusLocation` visible and editable in admin.
 
 ### T3 — `Category` model
 - **Labels:** `foundation`, `catalog`, `onboarding`
-- **Assignee:** Dev C (low)
+- **Assignee:** Kevin 
 - **Depends on:** nothing (can share `apps/catalog` with T2 — coordinate to avoid both editing the same migration file simultaneously)
 - **Description:** Implement `Category` (`id`, `name` unique) in `apps/catalog`. No `parent_category_id` — deferred (FLAG 10). Seed the six known categories: Books, Electronics, Clothing, Crafts, Furniture, Services.
 - **Acceptance criteria:** migration applies; `Category` visible and editable in admin; six seed rows present.
@@ -49,21 +49,21 @@ apps/
 
 ### T4 — `Profile` model
 - **Labels:** `accounts`
-- **Assignee:** Dev A (high)
+- **Assignee:** Lee 
 - **Depends on:** T1 (merged), T2 (merged)
 - **Description:** `Profile` in `apps/accounts` — one-to-one with `User`, FK to `CampusLocation`, `phone_number`, `bio` (free text), `profile_photo_url`.
 - **Acceptance criteria:** migration applies; admin shows Profile inline on the User admin page or as its own registered model; a Profile can be created linking an existing User and CampusLocation.
 
 ### T5 — `Good` model
 - **Labels:** `goods`
-- **Assignee:** Dev B (medium)
+- **Assignee:** Ian 
 - **Depends on:** T1 (merged), T3 (merged)
 - **Description:** `Good` in new `apps/goods` — FK `seller`→`User`, FK `category`→`Category`, `title`, `description`, `price` (`DECIMAL(10,2)`, `CHECK price >= 0`), `condition` (`CHECK IN ('new','used')`), `status` (`CHECK IN ('available','unavailable')`, default `'available'`).
 - **Acceptance criteria:** migration applies; admin registered; a Good can be created via admin referencing a real User and Category; inserting `price = -5` fails at the DB level.
 
 ### T6 — `Service` model
 - **Labels:** `services`
-- **Assignee:** Dev C (low)
+- **Assignee:** Kevin 
 - **Depends on:** T1 (merged), T3 (merged)
 - **Description:** `Service` in new `apps/services` — same shape as `Good` minus `condition`.
 - **Acceptance criteria:** migration applies; admin registered; a Service can be created via admin.
@@ -74,21 +74,21 @@ apps/
 
 ### T7 — `GoodImage` model
 - **Labels:** `goods`
-- **Assignee:** Dev B (medium)
+- **Assignee:** Ian 
 - **Depends on:** T5
 - **Description:** `GoodImage` — FK `good`→`Good` (`ON DELETE CASCADE`), `image_url`, `uploaded_at`. Enforce max 15 images per Good in `clean()`/admin validation (not DB-enforceable — FLAG 6).
 - **Acceptance criteria:** migration applies; admin registered as inline on Good or standalone; attempting a 16th image for the same Good is rejected with a clear error.
 
 ### T8 — `ServiceImage` model
 - **Labels:** `services`
-- **Assignee:** Dev C (low)
+- **Assignee:** Kevin 
 - **Depends on:** T6
 - **Description:** Same as T7, scoped to `Service`.
 - **Acceptance criteria:** same pattern as T7.
 
 ### T9 — Django REST Framework (DRF) project setup
 - **Labels:** `foundation`, `api`, `priority:blocking`
-- **Assignee:** Dev A (high)
+- **Assignee:** Lee 
 - **Depends on:** T1
 - **Description:** Install `djangorestframework`, add to `INSTALLED_APPS`, configure default pagination, default permission classes, and a base `urls.py` API router. This unblocks Day 4's serializer/view tickets for everyone — no one should start writing DRF serializers before this merges.
 - **Acceptance criteria:** `/api/` root loads (even empty); DRF browsable API renders.
@@ -101,21 +101,21 @@ apps/
 
 ### T10 — `accounts` API: registration, OTP, login, Profile
 - **Labels:** `accounts`, `api`
-- **Assignee:** Dev A (high)
+- **Assignee:** Lee 
 - **Depends on:** T4, T9
 - **Description:** Registration endpoint (validates `@kabarak.ac.ke` email, generates + hashes OTP, sends it), OTP verification endpoint, login endpoint, Profile retrieve/update endpoint (`ModelViewSet` or `GenericAPIView` + mixins per DRF convention).
 - **Acceptance criteria:** registering with a non-university email is rejected before hitting the DB; a valid registration produces a hashed OTP with an expiry; verifying the correct OTP sets `is_email_verified = True`; Profile endpoint returns/updates the logged-in user's own profile only.
 
 ### T11 — `goods` API: CRUD + image upload
 - **Labels:** `goods`, `api`
-- **Assignee:** Dev B (medium)
+- **Assignee:** Ian 
 - **Depends on:** T7, T9
 - **Description:** `GoodSerializer` + `ModelViewSet` for full CRUD, nested `GoodImageSerializer` for upload (respecting the 15-image cap at the serializer/view level too — belt and suspenders with T7's model-level check).
 - **Acceptance criteria:** a seller can create/edit/delete their own Good via the API; a Good's images can be listed and added; a 16th image attempt returns a clear validation error, not a 500.
 
 ### T12 — `services` API: CRUD + image upload
 - **Labels:** `services`, `api`
-- **Assignee:** Dev C (low)
+- **Assignee:** Kevin 
 - **Depends on:** T8, T9
 - **Description:** Mirrors T11 for `Service`/`ServiceImage`.
 - **Acceptance criteria:** mirrors T11.
@@ -126,14 +126,14 @@ apps/
 
 ### T13 — `catalog` API: read-only Category + CampusLocation endpoints
 - **Labels:** `catalog`, `api`
-- **Assignee:** whoever finishes T11/T12 first (likely Dev C, since Service is the simpler slice)
+- **Assignee:** whoever finishes T11/T12 first (likely Kevin, since Service is the simpler slice)
 - **Depends on:** T2, T3, T9
 - **Description:** Read-only `ModelViewSet`s (`ReadOnlyModelViewSet`) exposing categories and campus locations for use in registration/listing forms.
 - **Acceptance criteria:** both endpoints return seeded data.
 
 ### T14 — Cross-listing keyword search (`itertools.chain()`)
 - **Labels:** `api`, `search`, `risk:overflow`
-- **Assignee:** Dev A (high)
+- **Assignee:** Lee 
 - **Depends on:** T10, T11, T12
 - **Description:** Search endpoint matching keyword against `Good`/`Service` `title`, `description`, `Category.name`, and seller `full_name`, combining both querysets via `itertools.chain()` per the confirmed FLAG 1 decision. Python-side pagination for v1 (the DB-view mitigation from FLAG 2 is explicitly out of scope this sprint).
 - **Acceptance criteria:** a keyword search returns matching Goods and Services together, ranked/ordered consistently.
@@ -141,10 +141,10 @@ apps/
 
 ### T15 — Seed data pass
 - **Labels:** `catalog`, `data`
-- **Assignee:** Dev B (medium)
+- **Assignee:** Ian 
 - **Depends on:** T2, T3
 - **Description:** Replace placeholder `CampusLocation` rows with the real list once supplied (still outstanding — FLAG 8). Confirm `Category` seed data matches Section 1.8/3.6.5 of the research paper exactly.
-- **Acceptance criteria:** seed data reviewed by at least one other dev before Day 7.
+- **Acceptance criteria:** seed data reviewed by at least one other Ianefore Day 7.
 
 ---
 
@@ -174,7 +174,7 @@ apps/
 
 ## Summary table
 
-| Day | Dev A (high) | Dev B (medium) | Dev C (low) |
+| Day | Lee  | Ian  | Kevin  |
 |---|---|---|---|
 | 1 | T1 User + scaffold (expedited merge) | T2 CampusLocation + env setup | T3 Category + env setup |
 | 2 | T4 Profile | T5 Good | T6 Service |
