@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import api_root
+from .views import api_root, service_list
 
 urlpatterns = [
     path("", api_root, name="api-root"),
-    # T10/T11/T12/T13 routes get added here as they're built
+    path("services/", service_list, name="service-list"),
 ]
