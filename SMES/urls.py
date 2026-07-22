@@ -19,5 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/", include("apps.api.urls")),
+    # Add this line to connect your goods app:
+    path('goods/', include('apps.goods.urls')), 
 ]
