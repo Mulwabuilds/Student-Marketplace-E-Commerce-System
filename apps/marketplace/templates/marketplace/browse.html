@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Browse — SMES{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Browse listings</h1>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search title or description">
+    </div>
+    <div class="col-md-2">
+        <select name="category" class="form-select">
+            <option value="">All categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="price_min" value="{{ price_min }}" class="form-control" placeholder="Min price" step="0.01">
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="price_max" value="{{ price_max }}" class="form-control" placeholder="Max price" step="0.01">
+    </div>
+    <div class="col-md-2">
+        <select name="condition" class="form-select">
+            <option value="">Any condition</option>
+            <option value="new" {% if condition == "new" %}selected{% endif %}>New</option>
+            <option value="used" {% if condition == "used" %}selected{% endif %}>Used</option>
+        </select>
+        <div class="form-text">Goods only</div>
+    </div>
+    <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for item in listings %}
+        <div class="col">
+            <div class="card h-100">
+                {% with first_image=item.images.first %}
+                    {% if first_image %}
+                        <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 180px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'marketplace/img/placeholder.png' %}" class="card-img-top" alt="No image" style="height: 180px; object-fit: cover;">
+                    {% endif %}
+                {% endwith %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="card-text text-truncate">{{ item.description }}</p>
+                    <p class="fw-bold">KES {{ item.price }}</p>
+                    <span class="badge bg-secondary align-self-start mb-2">
+                        {% if item.condition %}{{ item.get_condition_display }}{% else %}Service{% endif %}
+                    </span>
+                    {# "View details" intentionally omitted: goods/services detail
+                       views + URL names (e.g. goods:detail, services:detail)
+                       aren't built yet -- see docs/flags.md. Swap this comment
+                       for a real link once Iyaan/Kevo land those. #}
+                    <span class="text-muted small mt-auto">Contact: {{ item.seller.profile.phone_number|default:"see seller profile" }}</span>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-muted">No listings match your filters yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

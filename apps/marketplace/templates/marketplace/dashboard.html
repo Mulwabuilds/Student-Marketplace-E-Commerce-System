@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SMES{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Your listings</h1>
+
+<h2 class="h5">Goods</h2>
+<div class="table-responsive mb-4">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Condition</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for good in goods %}
+                <tr>
+                    <td>{{ good.title }}</td>
+                    <td>KES {{ good.price }}</td>
+                    <td>{{ good.get_condition_display }}</td>
+                    <td>
+                        <span class="badge {% if good.status == 'available' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ good.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ good.created_at|date:"d M Y" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="text-muted">You haven't listed any goods yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2 class="h5">Services</h2>
+{% if services_blocked %}
+    <div class="alert alert-warning">
+        Services can't be shown here yet — the <code>Service</code> model doesn't have a
+        seller field wired up yet (see <code>docs/flags.md</code>). Once that's added,
+        your services will appear in this section automatically.
+    </div>
+{% else %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td>{{ service.title }}</td>
+                        <td>KES {{ service.price }}</td>
+                        <td>
+                            <span class="badge {% if service.is_available %}bg-success{% else %}bg-secondary{% endif %}">
+                                {% if service.is_available %}Available{% else %}Unavailable{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ service.created_at|date:"d M Y" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-muted">You haven't listed any services yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}
