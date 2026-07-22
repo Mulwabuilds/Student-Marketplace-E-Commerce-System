@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ good.title }} - Marketplace</title>
+</head>
+<body>
+    <a href="{% url 'good_list' %}">← Back to all items</a>
+    <hr>
+
+    <h1>{{ good.title }}</h1>
+    <h2>KES {{ good.price }}</h2>
+    
+    <p><strong>Condition:</strong> {{ good.get_condition_display }}</p>
+    <p><strong>Category:</strong> {{ good.category.name }}</p>
+    <p><strong>Description:</strong><br> {{ good.description }}</p>
+    <p><strong>Seller:</strong> {{ good.seller.username }}</p>
+
+    {% if request.user == good.seller %}
+        <hr>
+        <h3>Seller Actions</h3>
+        <a href="{% url 'good_update' good.id %}"><button>Edit Listing</button></a>
+        <a href="{% url 'good_delete' good.id %}"><button style="color: red;">Delete Listing</button></a>
+    {% endif %}
+</body>
+</html>

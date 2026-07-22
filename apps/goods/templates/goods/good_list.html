@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Marketplace</title>
+</head>
+<body>
+    <h1>Available Items</h1>
+    <a href="{% url 'good_create' %}">Sell an Item</a>
+    <hr>
+
+    {% if goods %}
+        <ul>
+        {% for good in goods %}
+            <li>
+                <a href="{% url 'good_detail' good.id %}">{{ good.title }}</a> 
+                - KES {{ good.price }} 
+                (Condition: {{ good.get_condition_display }})
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No items available right now.</p>
+    {% endif %}
+</body>
+</html>

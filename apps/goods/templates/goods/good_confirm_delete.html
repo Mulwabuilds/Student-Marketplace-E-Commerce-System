@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete {{ good.title }}</title>
+</head>
+<body>
+    <h1>Are you sure?</h1>
+    <p>You are about to delete "<strong>{{ good.title }}</strong>". This cannot be undone.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <a href="{% url 'good_detail' good.id %}">Nevermind, go back</a>
+        <button type="submit" style="color: red;">Yes, delete it</button>
+    </form>
+</body>
+</html>
