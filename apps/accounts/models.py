@@ -20,6 +20,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, blank=True)
     bio = models.TextField(blank=True)
     profile_photo_url = models.URLField(max_length=500, blank=True)
+    is_open = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
