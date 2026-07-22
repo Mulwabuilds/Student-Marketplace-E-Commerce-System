@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.catalog.models import Service, ServiceImage
+from apps.services.models import Service, ServiceImage
 
 
 class ServiceImageSerializer(serializers.ModelSerializer):

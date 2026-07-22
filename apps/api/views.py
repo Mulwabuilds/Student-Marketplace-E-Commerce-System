@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from apps.catalog.models import Service
+from apps.services.models import Service
 from .serializers import ServiceSerializer
 
 
