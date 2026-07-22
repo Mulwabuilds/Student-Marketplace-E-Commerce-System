@@ -90,3 +90,39 @@ Postgres can't natively validate "email must end in @kabarak.ac.ke" as a column 
 ## FLAG 10 — Subcategories: added a dormant column, not a feature
 
 Per your instruction to flag subcategories for later, I added a nullable `parent_category_id` self-referencing column on `Category` now. It costs nothing today (stays null for every row) and avoids a schema migration + data backfill later. This is a low-risk future-proofing addition — not scope creep — but flagging it since you didn't explicitly ask for it.
+
+---
+
+## Session: Maximus's Sprint 2 build (Claude-assisted) — for Ian/Kevo
+
+### Blocking — needs Kevo's decision
+- **`Service` has no `seller` field.** Confirmed by reading the model directly (now in `apps/services/models.py`, moved from `apps/catalog`). Kevo's task doc assumes `service.seller` / `service.seller.profile` exist; they don't yet. This blocks the dashboard's services section (shows a "blocked" notice instead of listings — see `apps/marketplace/views.py::_service_has_seller()`, which checks at runtime and degrades gracefully rather than crashing) and any buyer-facing "contact the seller" display for a service.
+- Once added (`seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='services')`), run `makemigrations services && migrate` — the dashboard will pick it up automatically, no other changes needed.
+
+### Done this session — services app move
+- Moved `Service`/`ServiceImage` out of `apps/catalog` into a new `apps/services` app (model-only move, no cross-app migration surgery needed since tables were empty).
+- Fixed every import referencing `apps.catalog.models.Service`/`ServiceImage`: `apps/api/serializers.py`, `apps/api/views.py`, `apps/marketplace/views.py`.
+- Registered `Service`/`ServiceImage` in Django admin (`apps/services/admin.py`) — these were never registered anywhere before, not a regression.
+- Migrations: `catalog/0004_...` drops the two models, `services/0001_initial.py` recreates them; dependency order verified correct, `migrate` runs clean on a fresh DB.
+- Ran `remove_stale_contenttypes` — cleaned the orphaned `catalog.service`/`catalog.serviceimage` content types + 4 auto permissions each. **If you have a persistent local dev DB, back it up before running this** — it cascade-deletes anything tied to those stale content types.
+- **Team coordination:** everyone must `git pull` then `python manage.py migrate` before continuing.
+- `Service.is_available` (bool) vs `Good.status` (choice field) are genuinely different shapes — `marketplace/views.py` branches on this; no unified filter expression across both models is possible as-is.
+
+### Known issue I could NOT reproduce
+- The "admin Add User form missing email field" open issue — rendered the actual add-user admin page via Django's test client against current `apps/accounts/admin.py`; the email field appears correctly. `add_fieldsets` already includes it and Django 5.2.16 handles it fine. Didn't touch `admin.py`. If still visibly broken in a browser, it's likely something else (cache, different symptom) — worth re-describing before anyone spends time on it.
+
+### Still open / deliberately out of scope
+- Goods/Services CRUD templates/views/forms (list, detail, create/edit/delete) — Iyaan/Kevo's territory, untouched.
+- `browse.html` cards have **no "View details" link yet** — intentionally omitted rather than pointing at `goods:detail`/`services:detail` URL names that don't exist. Wire it in once those detail views land (marked with a comment in the template).
+- Real `CampusLocation` seed data (still placeholder names).
+
+### What landed (Maximus's steps)
+- `Profile.is_open` field + migration.
+- `GoodImage.image_url` → real `ImageField` + migration; fixed resulting breakage in `apps/goods/serializers.py` and `seed_data.py`.
+- Generic placeholder image at `apps/marketplace/static/marketplace/img/placeholder.png` (browse-page `<img>` fallback + used by `seed_data.py`). Point a services seed command at the same file for visual parity.
+- No-OTP register/login/logout/profile-edit (template-based), fully separate from existing DRF OTP endpoints under `/api/accounts/` (untouched).
+- `apps/marketplace`: public `browse` (search/category/price/condition filters) + `dashboard` (seller's own goods; services blocked pending seller field).
+- `templates/base.html`, Bootstrap 5 CDN, auth-aware navbar.
+- Settings: `MEDIA_URL`/`MEDIA_ROOT`, project `TEMPLATES DIRS`, `LOGIN_URL`/`LOGIN_REDIRECT_URL`, `apps.services` + `apps.marketplace` added to `INSTALLED_APPS`.
+
+Full flow tested end-to-end via Django's test client on a fresh migrated DB: register (valid + invalid email) → login session → profile edit incl. `is_open` toggle → dashboard → logout. All passed.
