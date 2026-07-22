@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.catalog',
     'apps.goods',
+    'apps.services',
+    'apps.marketplace',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -78,10 +80,16 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'SMES.urls'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'marketplace:browse'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
