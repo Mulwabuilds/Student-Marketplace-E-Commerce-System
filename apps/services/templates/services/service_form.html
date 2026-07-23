@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ action }} Service</title>
+</head>
+<body>
+
+<h1>{{ action }} Service</h1>
+
+<form method="POST">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">{{ action }} Service</button>
+</form>
+
+<p><a href="{% url 'service_list' %}">Back to Services</a></p>
+
+</body>
+</html>
