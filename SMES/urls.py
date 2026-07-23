@@ -21,10 +21,11 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Add this line to connect your goods app:
-    path('goods/', include('apps.goods.urls')), 
+
+    path('goods/', include('apps.goods.urls')),
     path("api/", include("apps.api.urls")),
     path("accounts/", include("apps.accounts.web_urls")),
+    path("services/", include("apps.services.urls")),   # ← Add this line
     path("", include("apps.marketplace.urls")),
 ]
 

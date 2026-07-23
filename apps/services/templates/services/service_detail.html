@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <a href="{% url 'service_list' %}" class="btn btn-outline-secondary mb-4">
+        ← Back to Services
+    </a>
+
+    <div class="card shadow-lg border-0">
+
+        <div class="card-body p-5">
+
+            <span class="badge bg-primary mb-3">
+                {{ service.category }}
+            </span>
+
+            {% if service.is_available %}
+                <span class="badge bg-success mb-3">
+                    Available
+                </span>
+            {% endif %}
+
+            <h1 class="fw-bold">
+                {{ service.title }}
+            </h1>
+
+            <hr>
+
+            <p class="lead">
+                {{ service.description }}
+            </p>
+
+            <h4 class="text-success">
+                KSh {{ service.price }}
+            </h4>
+
+            <p class="text-muted">
+                <i class="bi bi-geo-alt-fill"></i>
+                {{ service.campus_location }}
+            </p>
+
+            <div class="mt-4">
+
+                <a href="{% url 'service_update' service.pk %}"
+                   class="btn btn-warning">
+                    Edit
+                </a>
+
+                <a href="{% url 'service_delete' service.pk %}"
+                   class="btn btn-danger">
+                    Delete
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
