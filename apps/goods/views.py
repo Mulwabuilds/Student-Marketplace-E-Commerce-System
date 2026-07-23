@@ -1,55 +1,120 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Good
-from .forms import GoodForm
+from django.db.models import Q
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-def good_list(request):
-    # Only show items that are currently available
-    goods = Good.objects.filter(status='available').order_by('-created_at')
-    return render(request, 'goods/good_list.html', {'goods': goods})
+# Make sure to import your new forms and the GoodImage model
+from .models import Good, GoodImage
+from .forms import GoodForm, GoodImageForm
 
-def good_detail(request, pk):
-    good = get_object_or_404(Good, pk=pk)
-    return render(request, 'goods/good_detail.html', {'good': good})
+class GoodListView(ListView):
+    model = Good
+    template_name = 'goods/good_list.html'
+    context_object_name = 'goods'
 
-@login_required
-def good_create(request):
-    if request.method == 'POST':
-        form = GoodForm(request.POST)
-        if form.is_valid():
-            # Save the form but don't commit to the database yet
-            good = form.save(commit=False)
-            # Assign the currently logged-in user as the seller
-            good.seller = request.user
-            good.save()
-            return redirect('good_detail', pk=good.pk)
-    else:
-        form = GoodForm()
-    
-    return render(request, 'goods/good_form.html', {'form': form, 'action': 'Create'})
+    def get_queryset(self):
+        # 1. Base query: Only show items that are 'available'
+        queryset = Good.objects.filter(status='available')
 
-@login_required
-def good_update(request, pk):
-    # Ensure the user can only update their own listings
-    good = get_object_or_404(Good, pk=pk, seller=request.user)
-    
-    if request.method == 'POST':
-        form = GoodForm(request.POST, instance=good)
-        if form.is_valid():
-            form.save()
-            return redirect('good_detail', pk=good.pk)
-    else:
-        form = GoodForm(instance=good)
+        # 2. Capture GET parameters from the search bar/filters
+        query = self.request.GET.get('q')
+        category = self.request.GET.get('category')
+        condition = self.request.GET.get('condition')
+        price_min = self.request.GET.get('price_min')
+        price_max = self.request.GET.get('price_max')
+
+        # 3. Apply filters dynamically if the user provided them
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            )
+        if category:
+            queryset = queryset.filter(category=category)
+        if condition:
+            queryset = queryset.filter(condition=condition)
+        if price_min:
+            queryset = queryset.filter(price__gte=price_min)
+        if price_max:
+            queryset = queryset.filter(price__lte=price_max)
+
+        return queryset
+
+class GoodDetailView(DetailView):
+    model = Good
+    template_name = 'goods/good_detail.html'
+    context_object_name = 'good'
+
+# --- SECURED CRUD VIEWS BELOW ---
+
+class GoodCreateView(LoginRequiredMixin, CreateView):
+    model = Good
+    form_class = GoodForm
+    template_name = 'goods/good_form.html'
+    success_url = reverse_lazy('good_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['image_form'] = GoodImageForm(self.request.POST, self.request.FILES)
+        else:
+            context['image_form'] = GoodImageForm()
+        return context
+
+    def form_valid(self, form):
+        # Assign the logged-in user as the seller
+        form.instance.seller = self.request.user 
         
-    return render(request, 'goods/good_form.html', {'form': form, 'action': 'Update'})
-
-@login_required
-def good_delete(request, pk):
-    # Ensure the user can only delete their own listings
-    good = get_object_or_404(Good, pk=pk, seller=request.user)
-    
-    if request.method == 'POST':
-        good.delete()
-        return redirect('good_list')
+        context = self.get_context_data()
+        image_form = context['image_form']
         
-    return render(request, 'goods/good_confirm_delete.html', {'good': good})
+        if image_form.is_valid():
+            self.object = form.save()
+            if image_form.cleaned_data.get('image'):
+                GoodImage.objects.create(good=self.object, image=image_form.cleaned_data['image'])
+            return super().form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+class GoodUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Good
+    form_class = GoodForm
+    template_name = 'goods/good_form.html'
+    success_url = reverse_lazy('good_list')
+
+    def test_func(self):
+        """Ensure only the seller can edit their item."""
+        obj = self.get_object()
+        return obj.seller == self.request.user 
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['image_form'] = GoodImageForm(self.request.POST, self.request.FILES)
+        else:
+            context['image_form'] = GoodImageForm()
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        image_form = context['image_form']
+        
+        if image_form.is_valid():
+            self.object = form.save()
+            if image_form.cleaned_data.get('image'):
+                GoodImage.objects.update_or_create(
+                    good=self.object,
+                    defaults={'image': image_form.cleaned_data['image']}
+                )
+            return super().form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+class GoodDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Good
+    template_name = 'goods/good_confirm_delete.html'
+    success_url = reverse_lazy('good_list')
+
+    def test_func(self):
+        """Ensure only the seller can delete their item."""
+        obj = self.get_object()
+        return obj.seller == self.request.user

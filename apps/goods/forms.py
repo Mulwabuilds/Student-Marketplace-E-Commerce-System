@@ -1,5 +1,5 @@
 from django import forms
-from apps.goods.models import Good
+from apps.goods.models import Good, GoodImage
 
 class GoodForm(forms.ModelForm):
     class Meta:
@@ -13,4 +13,13 @@ class GoodForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Price in KES'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'condition': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+class GoodImageForm(forms.ModelForm):
+    class Meta:
+        model = GoodImage
+        fields = ['image']
+        
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'})
         }

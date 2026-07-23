@@ -1,19 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ action }} Item</title>
-</head>
-<body>
-    <a href="{% url 'good_list' %}">← Cancel</a>
-    <hr>
+{% extends 'base.html' %}
 
-    <h1>{{ action }} Listing</h1>
-    
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Listing</button>
-    </form>
-</body>
-</html>
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{% if object %}Edit Listing{% else %}Post a New Good{% endif %}</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Critical: enctype required for image uploads -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <h5 class="border-bottom pb-2 mb-3">Item Details</h5>
+                        <!-- Renders the main form fields (title, price, category, etc.) -->
+                        {{ form.as_p }}
+                        
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Product Image</h5>
+                        <!-- Renders the image upload field -->
+                        {{ image_form.as_p }}
+                        
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'good_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if object %}Save Changes{% else %}Post Listing{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,26 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ good.title }} - Marketplace</title>
-</head>
-<body>
-    <a href="{% url 'good_list' %}">← Back to all items</a>
-    <hr>
+{% extends 'base.html' %}
 
-    <h1>{{ good.title }}</h1>
-    <h2>KES {{ good.price }}</h2>
-    
-    <p><strong>Condition:</strong> {{ good.get_condition_display }}</p>
-    <p><strong>Category:</strong> {{ good.category.name }}</p>
-    <p><strong>Description:</strong><br> {{ good.description }}</p>
-    <p><strong>Seller:</strong> {{ good.seller.username }}</p>
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Left Column: Product Image -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <!-- Checks if the good has any related images -->
+                {% if good.goodimage_set.first %}
+                    <img src="{{ good.goodimage_set.first.image.url }}" class="card-img-top rounded" alt="{{ good.title }}" style="object-fit: cover; max-height: 500px;">
+                {% else %}
+                    <!-- Fallback placeholder if no image was uploaded -->
+                    <div class="bg-light d-flex justify-content-center align-items-center rounded" style="height: 400px;">
+                        <span class="text-muted">No Image Available</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-    {% if request.user == good.seller %}
-        <hr>
-        <h3>Seller Actions</h3>
-        <a href="{% url 'good_update' good.id %}"><button>Edit Listing</button></a>
-        <a href="{% url 'good_delete' good.id %}"><button style="color: red;">Delete Listing</button></a>
-    {% endif %}
-</body>
-</html>
+        <!-- Right Column: Product Details & Actions -->
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-2">{{ good.title }}</h2>
+            <h3 class="text-success mb-3">KES {{ good.price }}</h3>
+            
+            <div class="mb-4">
+                <span class="badge bg-secondary me-2">{{ good.category }}</span>
+                <span class="badge bg-info">{{ good.condition }}</span>
+            </div>
+
+            <h5 class="border-bottom pb-2">Description</h5>
+            <p class="lead text-muted">{{ good.description }}</p>
+            
+            <hr class="my-4">
+            
+            <p><strong>Posted by:</strong> {{ good.seller.username }}</p>
+
+            <!-- Dynamic UI: Ownership Controls -->
+            <div class="mt-4">
+                {% if request.user == good.seller %}
+                    <!-- Only the seller sees these -->
+                    <a href="{% url 'good_update' good.pk %}" class="btn btn-warning me-2">Edit Listing</a>
+                    <a href="{% url 'good_delete' good.pk %}" class="btn btn-danger">Delete Item</a>
+                {% else %}
+                    <!-- Buyers see the contact button -->
+                    <a href="#" class="btn btn-primary btn-lg w-100">Message Seller</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
