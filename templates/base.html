@@ -20,6 +20,10 @@
 
                 <nav class="nav-links">
                     <a href="{% url 'marketplace:browse' %}" class="nav-link">Browse</a>
+                    <div class="tabs" style="margin-bottom:0;padding:2px;">
+                        <a href="{% url 'good_list' %}" class="tab-btn{% if request.resolver_match.url_name == 'good_list' %} active{% endif %}" style="text-decoration:none;display:inline-block;">Goods</a>
+                        <a href="{% url 'service_list' %}" class="tab-btn{% if request.resolver_match.url_name == 'service_list' %} active{% endif %}" style="text-decoration:none;display:inline-block;">Services</a>
+                    </div>
                     {% if user.is_authenticated %}
                         <a href="{% url 'marketplace:dashboard' %}" class="nav-link">Dashboard</a>
                         <a href="{% url 'accounts:profile-edit' %}" class="nav-link">Profile</a>
@@ -43,6 +47,8 @@
 
             <div x-show="open" x-transition @click.outside="open = false" class="nav-mobile" style="display:none;">
                 <a href="{% url 'marketplace:browse' %}" class="nav-link">Browse</a>
+                <a href="{% url 'good_list' %}" class="nav-link">Goods</a>
+                <a href="{% url 'service_list' %}" class="nav-link">Services</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'marketplace:dashboard' %}" class="nav-link">Dashboard</a>
                     <a href="{% url 'accounts:profile-edit' %}" class="nav-link">Profile</a>
