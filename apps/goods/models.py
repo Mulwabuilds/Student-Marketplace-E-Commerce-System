@@ -100,9 +100,13 @@ class GoodImage(models.Model):
 
     def clean(self):
 
-        # Enforces the max 15 images rule before saving
-
-        if self.good.images.count() >= 15 and not self.pk:
+        # Enforces the max 15 images rule before saving.
+        # Guarded on self.good_id: GoodCreateView/GoodUpdateView call
+        # image_form.is_valid() before the Good is created/assigned, which
+        # was crashing every image upload with RelatedObjectDoesNotExist.
+        # The cap is still enforced -- save() re-runs clean() once `good`
+        # is actually set, right before the row is written.
+        if self.good_id and self.good.images.count() >= 15 and not self.pk:
 
             raise ValidationError("A maximum of 15 images is allowed per good.")
 
