@@ -11,11 +11,12 @@ User = get_user_model()
 
 # Generic placeholder image shared across Goods and Services seed data,
 # so seeding doesn't depend on network access (GoodImage.image / ServiceImage.image
-# are real ImageFields now, not URLs, per Step 2a). Lives as a static asset in
-# apps/marketplace so it also doubles as an <img> fallback in templates.
+# are real ImageFields now, not URLs, per Step 2a). Lives in the consolidated
+# top-level static/ dir (templates/static were consolidated out of per-app
+# dirs this sprint -- see docs/flags.md).
 _PLACEHOLDER_PATH = (
     Path(__file__).resolve().parent.parent.parent.parent.parent
-    / "apps" / "marketplace" / "static" / "marketplace" / "img" / "placeholder.png"
+    / "static" / "img" / "placeholder.png"
 )
 
 class Command(BaseCommand):
@@ -39,7 +40,11 @@ class Command(BaseCommand):
             CampusLocation.objects.get_or_create(name=loc_name)
 
         # 2.5 Create a Category
-        category, _ = Category.objects.get_or_create(name='Appliances')
+        # NOTE: was 'Appliances' -- not one of the six categories the paper
+        # specifies (Books, Electronics, Clothing, Crafts, Furniture,
+        # Services). Fixed to use a canonical one. Run `manage.py
+        # seed_categories` for the full canonical set.
+        category, _ = Category.objects.get_or_create(name='Electronics')
 
         # 3. Create a Dummy Listing (Matching the exact model choices)
         good, created = Good.objects.get_or_create(
