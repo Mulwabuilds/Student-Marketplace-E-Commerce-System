@@ -1,10 +1,16 @@
 from django.db import models
+from django.conf import settings
 
 from apps.catalog.models import Category, CampusLocation
 
 
 class Service(models.Model):
     id = models.BigAutoField(primary_key=True)
+    seller = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="services"
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
