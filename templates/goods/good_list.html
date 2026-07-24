@@ -9,42 +9,29 @@
     <a href="{% url 'good_create' %}" class="btn btn-primary">+ Sell an item</a>
 </div>
 
-<form method="get" class="filter-bar">
+<form method="get" class="filter-bar"
+      hx-get="{% url 'good_list' %}"
+      hx-target="#listing-grid"
+      hx-swap="outerHTML"
+      hx-push-url="true"
+      hx-trigger="change, keyup changed delay:400ms from:input[name='q']"
+      hx-indicator=".filter-spinner">
     <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search title or description">
-    <input type="text" name="category" value="{{ request.GET.category }}" placeholder="Category ID">
+    <select name="category">
+        <option value="">All categories</option>
+        {% for cat in categories %}
+            <option value="{{ cat.pk }}" {% if request.GET.category == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
     <select name="condition">
         <option value="">Any condition</option>
         <option value="new" {% if request.GET.condition == 'new' %}selected{% endif %}>New</option>
         <option value="used" {% if request.GET.condition == 'used' %}selected{% endif %}>Used</option>
     </select>
-    <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="Min price">
-    <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="Max price">
-    <button type="submit" class="btn btn-primary">Filter</button>
+    <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="Min price" step="0.01">
+    <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="Max price" step="0.01">
+    <span class="filter-spinner htmx-indicator" aria-hidden="true">⏳</span>
 </form>
 
-<div class="listing-grid">
-    {% for good in goods %}
-        <a href="{% url 'good_detail' good.pk %}" class="listing-card">
-            {% with first_image=good.images.first %}
-                <div class="listing-media">
-                    {% if first_image %}
-                        <img src="{{ first_image.image.url }}" alt="{{ good.title }}">
-                    {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" alt="No image">
-                    {% endif %}
-                </div>
-            {% endwith %}
-            <div class="listing-body">
-                <div class="listing-top">
-                    <h3 class="listing-title">{{ good.title }}</h3>
-                    <span class="badge badge-moss">{{ good.get_condition_display|default:good.condition }}</span>
-                </div>
-                <p class="listing-price">KES {{ good.price }}</p>
-                <span class="badge badge-muted" style="margin-top:8px;">{{ good.category }}</span>
-            </div>
-        </a>
-    {% empty %}
-        <div class="empty-state">No goods found matching your criteria.</div>
-    {% endfor %}
-</div>
+{% include 'goods/_listing_grid.html' with goods=goods %}
 {% endblock %}

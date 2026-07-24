@@ -1,7 +1,9 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.template.loader import render_to_string
 
 from .models import Service, ServiceImage
 from .forms import ServiceForm, ServiceImageForm
@@ -11,23 +13,22 @@ def service_list(request):
     services = Service.objects.filter(is_available=True).order_by("-created_at")
 
     query = request.GET.get('q')
-    category = request.GET.get('category')
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
-    # No `condition` filter here -- Service has no such field.
+    # No `category` filter -- Service has no category field.
 
     if query:
         services = services.filter(Q(title__icontains=query) | Q(description__icontains=query))
-    if category:
-        services = services.filter(category=category)
     if price_min:
         services = services.filter(price__gte=price_min)
     if price_max:
         services = services.filter(price__lte=price_max)
 
-    return render(request, "services/service_list.html", {
-        "services": services
-    })
+    context = {"services": services}
+    if request.headers.get('HX-Request'):
+        return HttpResponse(render_to_string('services/_listing_grid.html', context, request=request))
+
+    return render(request, "services/service_list.html", context)
 
 
 def service_detail(request, pk):
