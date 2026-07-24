@@ -1,5 +1,5 @@
 from django import forms
-from .models import Service
+from .models import Service, ServiceImage
 
 
 class ServiceForm(forms.ModelForm):
@@ -13,3 +13,11 @@ class ServiceForm(forms.ModelForm):
             "price",
             "is_available",
         ]
+
+
+class ServiceImageForm(forms.ModelForm):
+    """New: there was no way to attach a photo to a service (no form, no
+    route). Mirrors apps/goods/forms.py::GoodImageForm."""
+    class Meta:
+        model = ServiceImage
+        fields = ['image']
