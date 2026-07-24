@@ -9,37 +9,18 @@
     <a href="{% url 'service_create' %}" class="btn btn-primary">+ Offer a service</a>
 </div>
 
-<form method="get" class="filter-bar">
+<form method="get" class="filter-bar"
+      hx-get="{% url 'service_list' %}"
+      hx-target="#listing-grid"
+      hx-swap="outerHTML"
+      hx-push-url="true"
+      hx-trigger="change, keyup changed delay:400ms from:input[name='q']"
+      hx-indicator=".filter-spinner">
     <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search title or description">
-    <input type="text" name="category" value="{{ request.GET.category }}" placeholder="Category ID">
-    <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="Min price">
-    <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="Max price">
-    <button type="submit" class="btn btn-primary">Filter</button>
+    <input type="number" name="price_min" value="{{ request.GET.price_min }}" placeholder="Min price" step="0.01">
+    <input type="number" name="price_max" value="{{ request.GET.price_max }}" placeholder="Max price" step="0.01">
+    <span class="filter-spinner htmx-indicator" aria-hidden="true">⏳</span>
 </form>
 
-<div class="listing-grid">
-    {% for service in services %}
-        <a href="{% url 'service_detail' service.pk %}" class="listing-card">
-            {% with first_image=service.images.first %}
-                <div class="listing-media">
-                    {% if first_image %}
-                        <img src="{{ first_image.image.url }}" alt="{{ service.title }}">
-                    {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" alt="No image">
-                    {% endif %}
-                </div>
-            {% endwith %}
-            <div class="listing-body">
-                <div class="listing-top">
-                    <h3 class="listing-title">{{ service.title }}</h3>
-                    <span class="badge badge-moss">Service</span>
-                </div>
-                <p class="listing-price">KES {{ service.price }}</p>
-                <span class="badge badge-muted" style="margin-top:8px;">{{ service.category }}</span>
-            </div>
-        </a>
-    {% empty %}
-        <div class="empty-state">No services available.</div>
-    {% endfor %}
-</div>
+{% include 'services/_listing_grid.html' with services=services %}
 {% endblock %}

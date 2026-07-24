@@ -1,0 +1,28 @@
+{% load static %}
+<div id="listing-grid" class="listing-grid swap-target">
+    {% for service in services %}
+        <a href="{% url 'service_detail' service.pk %}" class="listing-card">
+            {% with first_image=service.images.first %}
+                <div class="listing-media">
+                    {% if first_image %}
+                        <img src="{{ first_image.image.url }}" alt="{{ service.title }}">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="No image">
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <div class="listing-body">
+                <div class="listing-top">
+                    <h3 class="listing-title">{{ service.title }}</h3>
+                    <span class="badge badge-moss">Service</span>
+                </div>
+                <p class="listing-desc">{{ service.description }}</p>
+                <div class="listing-meta">
+                    <span class="listing-price">KES {{ service.price }}</span>
+                </div>
+            </div>
+        </a>
+    {% empty %}
+        <div class="empty-state">No services found matching your criteria.</div>
+    {% endfor %}
+</div>

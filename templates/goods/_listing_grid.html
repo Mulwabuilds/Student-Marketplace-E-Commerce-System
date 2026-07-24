@@ -1,0 +1,28 @@
+{% load static %}
+<div id="listing-grid" class="listing-grid swap-target">
+    {% for good in goods %}
+        <a href="{% url 'good_detail' good.pk %}" class="listing-card">
+            {% with first_image=good.images.first %}
+                <div class="listing-media">
+                    {% if first_image %}
+                        <img src="{{ first_image.image.url }}" alt="{{ good.title }}">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="No image">
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <div class="listing-body">
+                <div class="listing-top">
+                    <h3 class="listing-title">{{ good.title }}</h3>
+                    <span class="badge badge-moss">{{ good.get_condition_display }}</span>
+                </div>
+                <p class="listing-desc">{{ good.description }}</p>
+                <div class="listing-meta">
+                    <span class="listing-price">KES {{ good.price }}</span>
+                </div>
+            </div>
+        </a>
+    {% empty %}
+        <div class="empty-state">No goods found matching your criteria.</div>
+    {% endfor %}
+</div>

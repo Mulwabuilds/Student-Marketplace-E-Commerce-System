@@ -1,7 +1,11 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.template.loader import render_to_string
+
+from apps.catalog.models import Category
 
 # Make sure to import your new forms and the GoodImage model
 from .models import Good, GoodImage
@@ -38,6 +42,18 @@ class GoodListView(ListView):
             queryset = queryset.filter(price__lte=price_max)
 
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all().order_by('name')
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if request.headers.get('HX-Request'):
+            self.object_list = self.get_queryset()
+            context = self.get_context_data()
+            return HttpResponse(render_to_string('goods/_listing_grid.html', context, request=request))
+        return super().get(request, *args, **kwargs)
 
 class GoodDetailView(DetailView):
     model = Good
