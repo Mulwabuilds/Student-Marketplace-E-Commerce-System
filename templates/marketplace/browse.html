@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Browse — SMES{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="page-title">Browse listings</h1>
+    <p class="page-subtitle">Goods and services from students across campus.</p>
+</div>
+
+<form
+    class="filter-bar"
+    hx-get="{% url 'marketplace:browse' %}"
+    hx-target="#listing-grid"
+    hx-swap="outerHTML"
+    hx-push-url="true"
+    hx-trigger="keyup changed delay:400ms from:input[name='q'], change from:select, change from:input[type='number']"
+    hx-indicator="#filter-spinner"
+>
+    <input type="text" name="q" value="{{ query }}" placeholder="Search title or description">
+
+    <select name="category">
+        <option value="">All categories</option>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="number" name="price_min" value="{{ price_min }}" step="0.01" placeholder="Min price">
+    <input type="number" name="price_max" value="{{ price_max }}" step="0.01" placeholder="Max price">
+
+    <div>
+        <select name="condition">
+            <option value="">Any condition</option>
+            <option value="new" {% if condition == "new" %}selected{% endif %}>New</option>
+            <option value="used" {% if condition == "used" %}selected{% endif %}>Used</option>
+        </select>
+        <p class="filter-hint">Goods only</p>
+    </div>
+
+    <div id="filter-spinner" class="htmx-indicator">
+        <span class="spinner"></span> Filtering…
+    </div>
+</form>
+
+{% include "marketplace/_listing_grid.html" %}
+{% endblock %}

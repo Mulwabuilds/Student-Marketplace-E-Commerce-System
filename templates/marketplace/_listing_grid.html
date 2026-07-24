@@ -1,0 +1,36 @@
+{% load static %}
+<div id="listing-grid" class="swap-target listing-grid">
+    {% for item in listings %}
+        {% if item.condition %}
+            {% url 'good_detail' item.pk as detail_url %}
+        {% else %}
+            {% url 'service_detail' item.pk as detail_url %}
+        {% endif %}
+        <a href="{{ detail_url }}" class="listing-card">
+            {% with first_image=item.images.first %}
+                <div class="listing-media">
+                    {% if first_image %}
+                        <img src="{{ first_image.image.url }}" alt="{{ item.title }}">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="No image">
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <div class="listing-body">
+                <div class="listing-top">
+                    <h3 class="listing-title">{{ item.title }}</h3>
+                    <span class="badge badge-moss">
+                        {% if item.condition %}{{ item.get_condition_display }}{% else %}Service{% endif %}
+                    </span>
+                </div>
+                <p class="listing-desc">{{ item.description }}</p>
+                <div class="listing-meta">
+                    <span class="listing-price">KES {{ item.price }}</span>
+                    <span class="text-muted" style="font-size:12px;">{{ item.seller.profile.phone_number|default:"see seller profile" }}</span>
+                </div>
+            </div>
+        </a>
+    {% empty %}
+        <div class="empty-state">No listings match your filters yet.</div>
+    {% endfor %}
+</div>

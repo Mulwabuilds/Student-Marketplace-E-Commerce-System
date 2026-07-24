@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card card-pad" style="max-width:560px;margin:0 auto;">
+    <h1 class="section-title" style="font-size:22px;">{{ action }} Service</h1>
+
+    <form method="POST" enctype="multipart/form-data" class="stack" style="margin-top:16px;">
+        {% csrf_token %}
+
+        <h3 class="section-title" style="font-size:13px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.04em;">Service details</h3>
+        {{ form.as_p }}
+
+        <h3 class="section-title" style="font-size:13px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.04em;margin-top:8px;">Photo</h3>
+        {{ image_form.as_p }}
+
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
+            <a href="{% url 'service_list' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ action }} Service</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

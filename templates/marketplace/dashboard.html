@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SMES{% endblock %}
+{% block content %}
+<div x-data="{ tab: 'goods' }">
+    <div class="row-between mb-8">
+        <div>
+            <h1 class="page-title">Your listings</h1>
+            <p class="page-subtitle">Everything you've posted to the marketplace.</p>
+        </div>
+        <div style="display:flex;gap:12px;">
+            <a href="{% url 'good_create' %}" class="btn btn-primary">+ Sell a good</a>
+            <a href="{% url 'service_create' %}" class="btn btn-outline">+ Offer a service</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button @click="tab = 'goods'" :class="tab === 'goods' ? 'tab-btn active' : 'tab-btn'">
+            Goods ({{ goods.count }})
+        </button>
+        <button @click="tab = 'services'" :class="tab === 'services' ? 'tab-btn active' : 'tab-btn'">
+            Services ({{ services.count }})
+        </button>
+    </div>
+
+    <div x-show="tab === 'goods'" class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Title</th><th>Price</th><th>Condition</th><th>Status</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for good in goods %}
+                    <tr>
+                        <td><strong>{{ good.title }}</strong></td>
+                        <td>KES {{ good.price }}</td>
+                        <td>{{ good.get_condition_display }}</td>
+                        <td>
+                            <span class="badge {% if good.status == 'available' %}badge-moss{% else %}badge-muted{% endif %}">
+                                {{ good.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-muted">{{ good.created_at|date:"d M Y" }}</td>
+                        <td style="text-align:right;">
+                            <a href="{% url 'good_detail' good.id %}" style="color:var(--amber-600);">View</a>
+                            &nbsp;<a href="{% url 'good_update' good.id %}" class="text-muted">Edit</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-muted" style="text-align:center;padding:32px;">You haven't listed any goods yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div x-show="tab === 'services'" style="display:none;">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Title</th><th>Price</th><th>Available</th><th>Created</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                        <tr>
+                            <td><strong>{{ service.title }}</strong></td>
+                            <td>KES {{ service.price }}</td>
+                            <td>
+                                <span class="badge {% if service.is_available %}badge-moss{% else %}badge-muted{% endif %}">
+                                    {% if service.is_available %}Available{% else %}Unavailable{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ service.created_at|date:"d M Y" }}</td>
+                            <td style="text-align:right;">
+                                <a href="{% url 'service_detail' service.id %}" style="color:var(--amber-600);">View</a>
+                                &nbsp;<a href="{% url 'service_update' service.id %}" class="text-muted">Edit</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-muted" style="text-align:center;padding:32px;">You haven't listed any services yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

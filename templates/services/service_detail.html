@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<a href="{% url 'service_list' %}" class="btn-ghost" style="display:inline-block;margin-bottom:24px;font-size:14px;font-weight:500;">← Back to services</a>
+
+<div style="display:grid;grid-template-columns:1fr;gap:32px;" class="detail-grid">
+    <style>@media (min-width: 768px){ .detail-grid { grid-template-columns: 1fr 1fr; } }</style>
+
+    {% with first_image=service.images.first %}
+        <div class="listing-media" style="border-radius:var(--radius-lg);border:1px solid var(--amber-100);">
+            {% if first_image %}
+                <img src="{{ first_image.image.url }}" alt="{{ service.title }}">
+            {% else %}
+                <img src="{% static 'img/placeholder.png' %}" alt="No image">
+            {% endif %}
+        </div>
+    {% endwith %}
+
+    <div>
+        <div style="margin-bottom:8px;">
+            <span class="badge badge-muted">{{ service.category }}</span>
+            {% if service.is_available %}<span class="badge badge-moss">Available</span>{% else %}<span class="badge badge-muted">Unavailable</span>{% endif %}
+        </div>
+
+        <h1 class="page-title">{{ service.title }}</h1>
+        <p class="listing-price" style="font-size:22px;">KES {{ service.price }}</p>
+
+        <h3 class="section-title" style="font-size:14px;text-transform:uppercase;color:var(--ink-faint);letter-spacing:.04em;margin-top:16px;">Description</h3>
+        <p style="font-size:15px;line-height:1.6;color:var(--ink-soft);">{{ service.description }}</p>
+
+        <p class="text-muted" style="margin-top:16px;font-size:14px;">📍 {{ service.campus_location }}</p>
+        <p class="text-muted" style="font-size:14px;"><strong style="color:var(--ink);">Offered by:</strong> {{ service.seller.username }}</p>
+
+        <div style="margin:12px 0;">
+            {% if service.seller.profile.is_open %}
+                <span class="badge badge-moss">🟢 Seller is open for business</span>
+            {% else %}
+                <span class="badge badge-muted">⚪ Seller is currently closed</span>
+            {% endif %}
+        </div>
+        {% if service.seller.profile.phone_number %}
+            <p style="font-size:14px;">
+                <strong style="color:var(--ink);">Contact (WhatsApp):</strong>
+                <a href="https://wa.me/{{ service.seller.profile.phone_number }}" style="color:var(--amber-600);font-weight:600;" target="_blank" rel="noopener">
+                    {{ service.seller.profile.phone_number }}
+                </a>
+            </p>
+        {% endif %}
+
+        <div style="margin-top:24px;">
+            {% if request.user == service.seller %}
+                <a href="{% url 'service_update' service.pk %}" class="btn btn-outline">Edit listing</a>
+                <a href="{% url 'service_delete' service.pk %}" class="btn btn-danger-outline">Delete listing</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

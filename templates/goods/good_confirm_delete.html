@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-pad" style="max-width:420px;margin:0 auto;text-align:center;border-color:var(--red-100);">
+    <h1 class="section-title">Confirm deletion</h1>
+    <p style="font-size:15px;">Are you sure you want to delete your listing for <strong>"{{ object.title }}"</strong>?</p>
+    <p class="text-muted" style="font-size:13px;">This action cannot be undone.</p>
+
+    <form method="post" style="margin-top:20px;display:flex;justify-content:center;gap:12px;">
+        {% csrf_token %}
+        <a href="{% url 'good_detail' object.pk %}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-danger">Yes, delete it</button>
+    </form>
+</div>
+{% endblock %}

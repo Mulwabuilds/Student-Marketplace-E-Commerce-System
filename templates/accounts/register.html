@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Register — SMES{% endblock %}
+{% block content %}
+<div style="max-width:420px;margin:0 auto;">
+    <div class="card card-pad" x-data="{ showPw: false }">
+        <h1 class="section-title" style="font-size:24px;">Create a seller account</h1>
+        <p class="text-muted" style="font-size:14px;margin-top:-4px;">Use your @kabarak.ac.ke email.</p>
+
+        <form method="post" novalidate class="stack" style="margin-top:24px;">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if 'password' in field.name %}
+                        <div class="password-field">
+                            {{ field }}
+                            <button type="button" @click="showPw = !showPw"
+                                    x-effect="document.getElementById('{{ field.id_for_label }}').type = showPw ? 'text' : 'password'"
+                                    class="password-toggle">
+                                <span x-text="showPw ? 'Hide' : 'Show'"></span>
+                            </button>
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <p class="field-error">{{ error }}</p>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+        </form>
+
+        <p class="text-muted" style="text-align:center;font-size:14px;margin-top:24px;">
+            Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--amber-600);font-weight:600;">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
